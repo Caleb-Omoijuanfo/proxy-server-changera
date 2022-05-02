@@ -30,9 +30,7 @@ app.use((req, res, next) => {
 app.post("/authenticate", async (req, res) => {
   const { code } = req.body;
 
-  console.log("code: ", code);
-  console.log("clientID: ", client_id);
-  console.log("serverport: ", server_port);
+  let apiResponse = {};
 
   const data = new FormData();
   data.append("client_id", client_id);
@@ -58,7 +56,13 @@ app.post("/authenticate", async (req, res) => {
     })
     .then((response) => response.json())
     .then((response) => {
-      return res.status(200).json(response);
+      apiResponse.profile = response;
+      return fetch(response?.repos_url);
+    })
+    .then((response) => response.json())
+    .then((response) => {
+      apiResponse.repositoryData = response;
+      return res.status(200).json(apiResponse);
     })
     .catch((error) => {
       return res.status(400).json(error);
